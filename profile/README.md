@@ -20,11 +20,11 @@
 본 프로젝트에서는 마이크로서비스 아키텍처로 전환하는 과정에서 다음과 같은 서비스들이 구축되었습니다. 
 서비스는 서비스가 담당하는 특정 기능이나 역할을 기준으로 분리하였습니다.
 
-- User Service: 사용자 관련 서비스
+- [User Service](https://github.com/syncfit-msa/user-service/blob/develop/README.md): 사용자 관련 서비스
 
 - Auth Service 사용자 인증 및 권한 관리 서비스
  
-- Wishlist Service: 사용자 맞춤형 위시리스트 관리 서비스
+- [Wishlist Service](https://github.com/syncfit-msa/wishlist-service/blob/wish/sep/README.md): 사용자 맞춤형 위시리스트 관리 서비스
 
 - Track Service: 트랙 정보 관리 서비스
 
