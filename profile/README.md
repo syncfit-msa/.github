@@ -39,13 +39,13 @@ Syncfit은 사용자가 감정을 입력하면 노래를 추천 해주는 서비
 
 - [User Service](https://github.com/syncfit-msa/user-service/blob/develop/README.md): 사용자 관련 서비스
 
-- Auth Service 사용자 인증 및 권한 관리 서비스
+- [Auth Service](https://github.com/syncfit-msa/auth-service/blob/develop/README.md): 사용자 인증 및 권한 관리 서비스
  
 - [Wishlist Service](https://github.com/syncfit-msa/wishlist-service/blob/wish/sep/README.md): 사용자 맞춤형 위시리스트 관리 서비스
 
 - [Track Service](https://github.com/syncfit-msa/track-service/blob/develop/README.md): 트랙 정보 관리 서비스
 
-- YouTube Client: YouTube: 영상 검색 및 연동 서비스
+- [YouTube Client](https://github.com/syncfit-msa/youtube-service/blob/develop/README.md): 영상 검색 및 연동 서비스
 
 - [Recommend Service](https://github.com/syncfit-msa/recommend-service/blob/develop/README.md): gemini api 와 spoitfy api를 활용한 음악 추천
 
