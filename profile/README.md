@@ -77,7 +77,7 @@ Jenkins를 활용하여 지속적 통합 및 배포(CI/CD) 파이프라인을 �
   
 배포 환경으로 AWS 클라우드를 활용하여 탄력적이고 안정적인 인프라를 구성하였습니다. 마이크로서비스는 AWS EC2 인스턴스 (또는 컨테이너 오케스트레이션을 위해 AWS ECS) 위에 Docker 컨테이너로 배포하였습니다. Jenkins 서버를 구성하고 보안 그룹으로 접근 제한하였습니다. 컨테이너 이미지는 AWS ECR에 저장하고, 배포 시 해당 이미지를 가져와 배포하는 전략 사용하였습니다.
 
-## 🚩 5. 서비스별 설정 방법
+## 🚩 6. 서비스별 설정 방법
 
 각 서비스에 대한 구체적인 설정 및 실행 방법은 아래에 서술되어 있습니다.
 
@@ -152,18 +152,63 @@ spring:
 ### 5.3. 실행 방법
 - -서비스를 로컬에서 실행하려면, Config-Service, Eureka, Api-gateway, 기타 서비스 순으로 실행합니다. 
 
-## 🚩 6. API 명세서
+## 🚩 7. 인증 방식
+![image](https://github.com/user-attachments/assets/8dc35797-96db-40f0-bce3-ea5273557c81)
+
+- 인증
+API Gateway + OAuth + Redis를 활용하여 인증 구조를 구현하였습니다. API Gateway에서 JWT 검증을 수행하고, OAuth를 통해 사용자 인증을 처리하며, Redis를 이용해 Refresh Token을 관리합니다.
+
+- 아키텍처 개요
+
+[Client] → [API Gateway (JWT 검증)] → [각 서비스]
+                                     ↘
+                          [User-Service (OAuth 인증, Redis)]
+
+- 인증 흐름
+
+1️⃣ 로그인 & 토큰 발급 (User-Service)
+
+1. 사용자가 로그인 요청 (/login)
+
+2. User-Service가 ID/PW 검증 후 Access Token & Refresh Token 발급
+
+3. Refresh Token은 Redis에 저장하여 관리
+
+4. 클라이언트에게 Access Token & Refresh Token 반환
+
+2️⃣ API 요청 처리 (API Gateway)
+
+1. 클라이언트가 API 요청 시 **Bearer <Access Token>**을 포함
+
+2. API Gateway가 JWT 유효성 검사 수행
+
+3. 유효하면 X-Member-Id 헤더 추가 후 각 서비스에 전달
+
+3️⃣ Access Token 만료 시 Refresh Token 사용
+
+1. Access Token이 만료되면 클라이언트가 /refresh 요청
+
+2. User-Service에서 Redis에 저장된 Refresh Token 검증
+
+3. 새로운 Access Token 발급 후 클라이언트에 반환
+
+- MSA 전환의 이점
+✅ API Gateway에서 JWT 검증을 수행하여 개별 서비스의 인증 부담을 줄입니다.
+✅ OAuth + Redis를 활용하여 보안성과 성능을 향상시킵니다.
+✅ MSA 친화적인 구조로 확장성과 유지보수성이 뛰어난 인증 시스템을 제공합니다.
+
+## 🚩 8. API 명세서
 각 서비스에서 제공하는 API는 다음 링크에서 확인할 수 있습니다. MSA 구조로 전환하는 과정에서 기존의 레거시 api와 달라진 부분이 있어 반영하여 작성하였습니다.
 
 [API 명세서](https://www.notion.so/1c35145985de80bbb1bcd92391e07245)
 
-## 🚩 7. 트러블슈팅
+## 🚩 9. 트러블슈팅
 - **문제**: 문제
   - 해결법: 해결볍
 - **문제**: 문제
   - 해결법: 해결법
 
-## 🚩 8. 향후 개선 여지
+## 🚩 10. 향후 개선 여지
 - **문제**: 해결법
 - **문제**: 해결법
 
