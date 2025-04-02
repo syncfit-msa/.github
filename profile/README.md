@@ -26,11 +26,11 @@
  
 - [Wishlist Service](https://github.com/syncfit-msa/wishlist-service/blob/wish/sep/README.md): 사용자 맞춤형 위시리스트 관리 서비스
 
-- Track Service: 트랙 정보 관리 서비스
+- [Track Service](https://github.com/syncfit-msa/track-service/blob/develop/README.md): 트랙 정보 관리 서비스
 
 - YouTube Client: YouTube: 영상 검색 및 연동 서비스
 
-- Recommend Service: gemini api 와 spoitfy api를 활용한 음악 추천
+- [Recommend Service](https://github.com/syncfit-msa/recommend-service/blob/develop/README.md): gemini api 와 spoitfy api를 활용한 음악 추천
 
 ## 🚩 4. 기술적 요구 사항 및 통신 방식
 - Eureka: 각 마이크로서비스가 실행될 때 자신을 Eureka 서버에 등록하고, 다른 서비스들이 자신을 Eureka 서버에서 검색하여 통신할 수 있게 합니다.
