@@ -159,11 +159,11 @@ spring:
 API Gateway + OAuth + Redis를 활용하여 인증 구조를 구현하였습니다. API Gateway에서 JWT 검증을 수행하고, OAuth를 통해 사용자 인증을 처리하며, Redis를 이용해 Refresh Token을 관리합니다.
 
 - 아키텍처 개요
-
+```
 [Client] → [API Gateway (JWT 검증)] → [각 서비스]
                                      ↘
                           [User-Service (OAuth 인증, Redis)]
-
+```
 - 인증 흐름
 
 1️⃣ 로그인 & 토큰 발급 (User-Service)
@@ -193,8 +193,11 @@ API Gateway + OAuth + Redis를 활용하여 인증 구조를 구현하였습니�
 3. 새로운 Access Token 발급 후 클라이언트에 반환
 
 - MSA 전환의 이점
+  
 ✅ API Gateway에서 JWT 검증을 수행하여 개별 서비스의 인증 부담을 줄입니다.
+
 ✅ OAuth + Redis를 활용하여 보안성과 성능을 향상시킵니다.
+
 ✅ MSA 친화적인 구조로 확장성과 유지보수성이 뛰어난 인증 시스템을 제공합니다.
 
 ## 🚩 8. API 명세서
