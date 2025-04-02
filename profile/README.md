@@ -51,22 +51,80 @@
 ### 5.1. 공통 설정
 - **환경 변수**: 각 서비스는 `.env` 파일을 통해 환경 변수를 설정하였습니다. 데이터베이스 URL, RabbitMQ 포트, 인증 관련 키 등을 환경변수로 설정하여 안전하게 관리하였습니다. 
 
-### 5.2. 개별 서비스 설정
-각 서비스는 독립적으로 실행될 수 있도록 설정 파일과 실행 방법을 제공하고 있습니다.
+### 5.2. 설정 정보
+각 서비스는 독립적으로 실행될 수 있도록 설정 파일을 가지고 있습니다. **User Service**를 예시로 설명하겠습니다.
 
-- **User Service**: `application.yml`에서 DB 연결 정보를 설정한 후, `mvn spring-boot:run`으로 실행할 수 있습니다.
-- **Auth Service**: `application.yml`에서 인증 서버 URL을 설정하고, 서비스 실행 후 JWT를 통한 인증을 처리합니다.
-- **Recommend Service**: Gemini API와 Spotify API를 활용하여 음악 추천 기능을 제공합니다. API 키는 환경 변수로 설정합니다.
+#### 5.2.2 application.yml
+`application.yml` 파일은 주로 애플리케이션의 설정을 정의하는 곳으로, 여러 설정을 포함할 수 있습니다. `spring.profiles.active`에 따라 활성화될 프로파일을 지정하고, 여러 모듈이나 설정을 포함할 수 있도록 설계됩니다.
+
+```yaml
+spring:
+  config:
+    import: optional:configserver:http://${CONFIG_HOST:127.0.0.1}:${CONFIG_PORT:8888}/
+  cloud:
+    config:
+      name: user-service  # Config Server에서 가져올 설정 이름
+  application:
+    name: user-service  # 애플리케이션 이름 (서비스 이름)
+  profiles:
+    active: local  # 활성화될 프로파일 (local, dev, prod 등)
+    include:
+      - redis  # Redis 설정 포함
+      - datasource  # 데이터 소스 설정 포함
+      - security  # 보안 관련 설정 포함
+      - openfeign  # OpenFeign 관련 설정 포함
+      - eureka  # Eureka 관련 설정 포함
+      - actuator  # Actuator 관련 설정 포함
+      - internal  # 내부 설정 포함
+```
+
+- spring.config.import: Config Server에서 설정 정보를 가져오는 부분입니다. 이 설정은 CONFIG_HOST와 CONFIG_PORT 환경 변수로 Config Server의 URL을 동적으로 설정합니다. Config Server를 통해 공통 설정을 가져오며, optional을 사용하여 서버가 없을 경우에도 실패하지 않도록 처리합니다.
+
+- spring.cloud.config.name: 설정 서버에서 가져올 설정의 이름을 지정합니다. 여기서 user-service는 해당 애플리케이션의 설정을 의미합니다.
+
+- spring.profiles.active: 활성화할 프로파일을 지정합니다. 로컬 환경에서는 local, 운영 환경에서는 prod 등을 지정할 수 있습니다. 이 값에 따라 설정 파일이 달라집니다.
+
+- include: 여러 설정 파일을 포함시킬 수 있습니다. redis, datasource, security 등을 포함시켜 필요에 따라 설정을 분리하여 관리할 수 있습니다.
+
+#### 5.2.2 bootstrap.yml
+bootstrap.yml 파일은 Spring Cloud 환경에서 중요한 역할을 하며, 주로 애플리케이션이 시작될 때 가장 먼저 로드되는 설정 파일입니다. 이 파일에서 Config Server와의 연결 설정을 포함시켜 초기 설정을 로드합니다.
+
+```
+spring:
+  application:
+    name: user-service  # 애플리케이션 이름 (서비스 이름)
+  cloud:
+    config:
+      uri: http://${CONFIG_HOST:127.0.0.1}:${CONFIG_PORT:8888}  # Config Server의 URI 설정
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}  # RabbitMQ 서버 호스트 (기본값: localhost)
+    port: ${RABBITMQ_PORT:5672}  # RabbitMQ 서버 포트 (기본값: 5672)
+    username: ${RABBITMQ_USERNAME:guest}  # RabbitMQ 사용자 이름 (기본값: guest)
+    password: ${RABBITMQ_PASSWORD:guest}  # RabbitMQ 사용자 비밀번호 (기본값: guest)
+```
+- spring.application.name: 애플리케이션의 이름을 지정합니다. 이 이름은 Config Server에서 설정을 가져오는 데 사용됩니다.
+
+- spring.cloud.config.uri: Config Server의 URI를 설정합니다. 이 값은 Config Server에서 설정 정보를 가져오기 위한 URL입니다. CONFIG_HOST와 CONFIG_PORT 환경 변수로 동적으로 구성되며, 기본적으로 http://127.0.0.1:8888을 사용합니다.
+
+- rabbitmq: RabbitMQ와의 연결을 위한 설정입니다. 메시지 큐를 사용하기 위해 RabbitMQ 서버의 호스트, 포트, 사용자 이름, 비밀번호를 설정합니다. 기본값을 지정하여, 환경 변수가 없을 경우 기본값을 사용하도록 설정할 수 있습니다.
+
+#### 5.2.3 Config Server에서 설정 정보 가져오기
+- Spring Cloud의 Config Server는 중앙 집중식 설정 서버로, 여러 마이크로서비스에서 공유할 설정을 외부 파일로 관리하고 이를 애플리케이션에서 쉽게 사용할 수 있게 합니다. application.yml 및 bootstrap.yml에서 설정한대로, Config Server에서 애플리케이션의 설정 정보를 가져옵니다.
+
+- Config Server URI: bootstrap.yml의 spring.cloud.config.uri 항목에서 설정한 URI를 통해, 애플리케이션은 Config Server에서 설정 파일을 가져옵니다.
+
+- name에 따른 설정 정보 적용용: application.yml의 spring.cloud.config.name 항목에서 정의된 값에 해당하는 설정을 Config Server에서 로드합니다. 예를 들어, user-service라는 이름을 사용하면, Config Server는 user-service.yml 설정 파일을 로드하여 애플리케이션에 적용합니다.
+
 
 ### 5.3. 실행 방법
-- **전체 프로젝트 실행**: 모든 서비스를 로컬에서 실행하려면, Config-Service, Eureka, Api-gateway, 기타 서비스 순으로 실행합니다. 
+- -서비스를 로컬에서 실행하려면, Config-Service, Eureka, Api-gateway, 기타 서비스 순으로 실행합니다. 
 
 ## 🚩 6. API 명세서
 각 서비스에서 제공하는 API는 다음 링크에서 확인할 수 있습니다. MSA 구조로 전환하는 과정에서 기존의 레거시 api와 달라진 부분이 있어 반영하여 작성하였습니다.
 
 [API 명세서](https://www.notion.so/1c35145985de80bbb1bcd92391e07245)
 
-## 🚩 7. 트러블슈팅 가이드
+## 🚩 7. 트러블슈팅
 - **문제**: 문제
   - 해결법: 해결볍
 - **문제**: 문제
